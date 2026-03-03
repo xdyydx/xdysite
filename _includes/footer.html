@@ -1,0 +1,60 @@
+<!-- _includes/footer.html -->
+<footer class="site-footer" style="width: 100%; margin-top: 50pt; font-family: 'Microsoft YaHei', '微软雅黑', sans-serif;">
+  {% comment %} 1. 右上角图标容器：GitHub + 邮件（替换为兼容图标） {% endcomment %}
+  <div class="footer-icons" style="position: absolute; top: 0; right: 0; margin: 10pt; z-index: 1;">
+    {% comment %} GitHub图标：替换为「GitHub」文字+符号，无依赖必显 {% endcomment %}
+    {% if site.github %}
+      <a href="{{ site.github }}" target="_blank" style="color: #999; text-decoration: none; margin-right: 15pt; font-size: 18pt;">
+        <span>🔗</span> GitHub <!-- 用链接符号+文字，全平台兼容 -->
+      </a>
+    {% endif %}
+    {% comment %} 邮件图标：替换为「📧」符号，更通用 {% endcomment %}
+    {% if site.email %}
+      <a href="mailto:{{ site.email }}" style="color: #999; text-decoration: none; font-size: 18pt;">
+        <span>📧</span> Email
+      </a>
+    {% endif %}
+  </div>
+
+  {% comment %} 2. 处理footerimg图片展示逻辑（保持不变） {% endcomment %}
+  <div class="footer-img-container" style="width: 100%; overflow: hidden; position: relative; margin-bottom: 10pt;">
+    {% if site.rel_path and (site.rel_path | append: '/footerimg.png' | file_exists) or (site.rel_path | append: '/footerimg.jpg' | file_exists) %}
+      {% assign img_ext = 'png' %}
+      {% unless site.rel_path | append: '/footerimg.png' | file_exists %}
+        {% assign img_ext = 'jpg' %}
+      {% endunless %}
+      {% assign img_path = site.rel_path | append: '/footerimg.' | append: img_ext %}
+      <img 
+        src="{{ img_path | relative_url }}" 
+        alt="底部背景图"
+        style="width: 100%; height: auto; display: block;"
+      >
+    {% else %}
+      <div style="
+        width: 100%;
+        height: calc(100vw / 16); /* 宽高比16:1 */
+        background-color: {{ site.footercolor | default: '#f0f0f0' }};
+      "></div>
+    {% endif %}
+  </div>
+
+  {% comment %} 3. 居中的灰色文字（保持不变） {% endcomment %}
+  <div class="footer-text" style="text-align: center; padding: 10pt 0;">
+    <p style="color: #999; margin: 0; font-size: 14pt;">
+      Hosted on Github Pages, author: {{ site.author | default: '未知作者' }}
+    </p>
+  </div>
+</footer>
+
+<!-- 补充样式（保持不变） -->
+<style>
+  .site-footer {
+    position: relative; /* 让右上角图标基于footer定位 */
+  }
+  @media (max-width: 768px) {
+    .footer-icons {
+      font-size: 14pt;
+      margin: 5pt;
+    }
+  }
+</style>

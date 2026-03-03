@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ page.title | default: site.title }}</title>
+
+  <!-- 引入样式文件（不变） -->
+  <link rel="stylesheet" href="{{ site.assets_path | default: '/assets' }}/css/style.scss" | relative_url }}">
+
+  <!-- 新增：页面背景色（优先读_config的bgcolor，默认白色） -->
+  <style>
+    body {
+      background-color: {{ site.bgcolor | default: '#ffffff' }} !important;
+      /* !important 确保覆盖style.scss里的默认值（如有） */
+    }
+  </style>
+</head>
+<body>
+  {% include header.html %}
+  {% include nav.html %}
+
+  <!-- 背景图容器（逻辑不变） -->
+  {% assign bgimg_path = '' %}
+  {% if site.rel_path %}
+    {% if site.rel_path | append: '/bgimg.png' | file_exists %}
+      {% assign bgimg_path = site.rel_path | append: '/bgimg.png' | relative_url %}
+    {% elsif site.rel_path | append: '/bgimg.jpg' | file_exists %}
+      {% assign bgimg_path = site.rel_path | append: '/bgimg.jpg' | relative_url %}
+    {% endif %}
+  {% endif %}
+
+  {% if bgimg_path != '' %}
+    <div class="bgimg-container" id="bgimgContainer">
+      <img src="{{ bgimg_path }}" alt="背景图">
+    </div>
+  {% endif %}
+
+  <!-- 内容区（逻辑不变） -->
+  <div class="content-wrapper">
+    {{ content }}
+  </div>
+
+  {% include footer.html %}
+
+  <!-- 交互逻辑JS（完全不变） -->
+  <script>
+    const bgimgContainer = document.getElementById('bgimgContainer');
+    const nav = document.querySelector('.main-nav');
+    const footer = document.querySelector('.site-footer');
+    let bgimgHeight = bgimgContainer ? bgimgContainer.offsetHeight : 0;
+    let navBottom = nav ? nav.offsetTop + nav.offsetHeight : 0;
+
+    if (bgimgContainer) {
+      bgimgContainer.style.top = `${navBottom}px`;
+    }
+
+    function handleBgimgPosition() {
+      if (!bgimgContainer || !footer) return;
+
+      const scrollTop = window.scrollY;
+      const viewportHeight = window.innerHeight;
+      const bgimgRealBottom = parseInt(bgimgContainer.style.top) + bgimgHeight - scrollTop;
+      const footerRealTop = footer.offsetTop - scrollTop;
+      const isFooterTouchBgimg = footerRealTop <= bgimgRealBottom;
+
+      if (!isFooterTouchBgimg) {
+        bgimgContainer.style.top = `${navBottom + scrollTop}px`;
+      } else {
+        const targetTop = (footer.offsetTop - bgimgHeight) + scrollTop;
+        bgimgContainer.style.top = `${targetTop}px`;
+      }
+    }
+
+    window.addEventListener('load', handleBgimgPosition);
+    window.addEventListener('scroll', handleBgimgPosition);
+    window.addEventListener('resize', () => {
+      bgimgHeight = bgimgContainer ? bgimgContainer.offsetHeight : 0;
+      navBottom = nav ? nav.offsetTop + nav.offsetHeight : 0;
+      handleBgimgPosition();
+    });
+  </script>
+</body>
+</html>

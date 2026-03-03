@@ -1,0 +1,90 @@
+<!-- _includes/nav.html -->
+{% comment %} 1. 先判断navimg是否存在，构建图片路径 {% endcomment %}
+{% assign navimg_path = '' %}
+{% if site.rel_path %}
+  {% if site.rel_path | append: '/navimg.png' | file_exists %}
+    {% assign navimg_path = site.rel_path | append: '/navimg.png' | relative_url %}
+  {% elsif site.rel_path | append: '/navimg.jpg' | file_exists %}
+    {% assign navimg_path = site.rel_path | append: '/navimg.jpg' | relative_url %}
+  {% endif %}
+{% endif %}
+
+<nav class="main-nav" style="
+  width: 100%;
+  height: 40pt;
+  font-family: 'Microsoft YaHei', '微软雅黑', sans-serif;
+  font-size: 20pt;
+  /* 背景色兜底 + 背景图 */
+  background-color: {{ site.navcolor | default: '#f8f8f8' }};
+  {% if navimg_path != '' %}
+    background-image: url('{{ navimg_path }}');
+    background-size: 100% auto;
+    background-position: top center;
+    background-repeat: no-repeat;
+  {% endif %}
+  /* 布局+粘性定位 */
+  display: flex;
+  align-items: center;
+  padding: 0 10pt;
+  box-sizing: border-box;
+  position: sticky;
+  top: 0;
+  z-index: 999;
+">
+  {% comment %} 左侧：首页链接（不变） {% endcomment %}
+  <div class="nav-left" style="flex: 0 0 auto;">
+    <a href="{{ '/' | relative_url }}" style="
+      color: #333;
+      text-decoration: none;
+      margin-right: 20pt;
+      text-shadow: 0 0 3px #fff;
+    ">首页</a>
+  </div>
+
+  {% comment %} 核心修改：筛选navi/下的.md文件（原.html） {% endcomment %}
+  <div class="nav-middle" style="flex: 1 1 auto;">
+    {% comment %} 
+      where_exp 条件修改：
+      1. page.path 包含 'navi/' → 确保是navi目录下的文件
+      2. page.path 以 '.md' 结尾 → 只匹配.md后缀文件
+    {% endcomment %}
+    {% assign navi_pages = site.pages | where_exp: "page", "page.path contains 'navi/' and page.path ends_with '.md'" %}
+    {% for page in navi_pages %}
+      {% if page.classname %} <!-- 仅显示有classname属性的.md文件 -->
+        <a href="{{ page.url | relative_url }}" style="
+          color: #333;
+          text-decoration: none;
+          margin-right: 20pt;
+          text-shadow: 0 0 3px #fff;
+        ">{{ page.classname }}</a>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  {% comment %} 右侧：标签Tag链接（不变） {% endcomment %}
+  <div class="nav-right" style="flex: 0 0 auto;">
+    <a href="{{ '/tag.html' | relative_url }}" style="
+      color: #333;
+      text-decoration: none;
+      text-shadow: 0 0 3px #fff;
+    ">#标签Tag</a>
+  </div>
+</nav>
+
+<!-- 补充样式（不变） -->
+<style>
+  .main-nav a {
+    white-space: nowrap;
+    line-height: 40pt;
+  }
+  @media (max-width: 768px) {
+    .main-nav {
+      font-size: 16pt;
+      height: 35pt;
+    }
+    .main-nav a {
+      margin-right: 10pt !important;
+      line-height: 35pt;
+    }
+  }
+</style>

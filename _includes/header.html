@@ -1,0 +1,83 @@
+<!-- _includes/header.html -->
+<!-- 1. 展示favicon -->
+<link rel="icon" href="{{ site.favicon | default: '/favicon.ico' }}" type="image/x-icon">
+
+<!-- 2. 头部容器：整体居中，包含图片、标题、描述 -->
+<header class="site-header" style="text-align: center; width: 100%;">
+  {% comment %} 3. 处理headerimg图片展示逻辑 {% endcomment %}
+  {% if site.rel_path and (site.rel_path | append: '/headerimg.png' | file_exists) or (site.rel_path | append: '/headerimg.jpg' | file_exists) %}
+    {% comment %} 优先判断png，没有则用jpg {% endcomment %}
+    {% assign img_ext = 'png' %}
+    {% unless site.rel_path | append: '/headerimg.png' | file_exists %}
+      {% assign img_ext = 'jpg' %}
+    {% endunless %}
+    {% assign img_path = site.rel_path | append: '/headerimg.' | append: img_ext %}
+
+    <!-- 图片容器：控制宽高比逻辑 -->
+    <div class="header-img-container" style="width: 100%; overflow: hidden; position: relative; margin-bottom: 20px;">
+      <img 
+        src="{{ img_path | relative_url }}" 
+        alt="头部背景图"
+        class="header-img"
+        style="
+          width: 100%;
+          {% comment %} 判断宽高比：Liquid无法直接获取图片尺寸，用JS处理宽高比逻辑 {% endcomment %}
+          object-fit: {% if site.headimgall == true or 1 == 1 %}cover{% else %}none{% endif %};
+          object-position: center;
+          {% comment %} 初始高度占位，JS会动态调整 {% endcomment %}
+          height: auto;
+        "
+        onload="
+          // JS处理宽高比逻辑（避开Liquid限制，前端实现更可靠）
+          const img = this;
+          const ratio = img.naturalWidth / img.naturalHeight;
+          const container = img.parentElement;
+          // 宽高比>16:3（≈5.333）：展示全图
+          if (ratio > 16/3) {
+            img.style.height = 'auto';
+            img.style.objectFit = 'contain';
+          } else {
+            // 宽高比<16:3：按headimgall判断
+            if ('{{ site.headimgall }}' === 'True') {
+              img.style.height = 'auto';
+              img.style.objectFit = 'contain';
+            } else {
+              // 强制宽高比16:3，展示中间部分
+              container.style.height = (container.offsetWidth / (16/3)) + 'px';
+              img.style.height = '100%';
+              img.style.objectFit = 'cover';
+              img.style.objectPosition = 'center';
+            }
+          }
+        "
+      >
+    </div>
+  {% else %}
+    {% comment %} 无图片时显示headercolor背景色 {% endcomment %}
+    <div class="header-img-placeholder" style="
+      width: 100%;
+      height: calc(100vw / (16/3));
+      background-color: {{ site.headercolor | default: '#f5f5f5' }};
+      margin-bottom: 20px;
+    "></div>
+  {% endif %}
+
+  {% comment %} 4. 标题和描述：居中展示 {% endcomment %}
+  <div class="header-text" style="width: 100%;">
+    <h1 class="site-title" style="
+      margin: 0;
+      padding: 0;
+      font-family: 'Microsoft YaHei', '微软雅黑', sans-serif;
+    ">
+      {{ site.title }}
+    </h1>
+    <p class="site-description" style="
+      margin: 10px 0 0 0;
+      padding: 0;
+      font-family: 'Microsoft YaHei', '微软雅黑', sans-serif;
+      color: #666;
+    ">
+      {{ site.description }}
+    </p>
+  </div>
+</header>
